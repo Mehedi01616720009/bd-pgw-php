@@ -83,9 +83,14 @@ BD-PGW-PHP/
 
 ## 🚀 Installation
 
-### 1. Download and Extract
+### 1. Clone or Download the Project
 
-Download the project files and extract them to your web server directory.
+Download the project files and extract them to your web server directory, or clone using Git:
+
+```bash
+git clone https://github.com/Mehedi01616720009/bd-pgw-php.git
+cd bd-pgw-php
+```
 
 ### 2. Environment Configuration
 
@@ -214,8 +219,8 @@ The application requires MySQL with the following tables:
 
 Obtain credentials from respective merchant panels:
 
--   [bKash Merchant Panel](https://merchant.bkash.com/)
--   [Nagad Merchant Portal](https://merchant.nagad.com/)
+-   [bKash Merchant Panel](https://developer.bka.sh/)
+-   [Nagad Merchant Portal](https://channel.mynagad.com:20010/)
 
 ### SSL Configuration
 
