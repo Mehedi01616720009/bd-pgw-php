@@ -62,7 +62,6 @@ BD-PGW-PHP/
 │   │   └── index.php
 │   └── nagad/
 │       └── index.php
-├── .env
 ├── .env.example
 ├── .gitignore
 ├── .htaccess
@@ -153,10 +152,205 @@ Import the SQL file (if provided) or run the application to create necessary tab
 ### 5. Start Development Server
 
 ```bash
-php -S localhost:8000 -t public
+php -S localhost:8000
 ```
 
 Visit `http://localhost:8000` in your browser.
+
+## 🧩 Usage
+
+### Basic Setup
+
+To use the payment gateways in your application, first include the necessary controller and models:
+
+```php
+// In your controller file
+use Models\Bkash;
+use Models\Nagad;
+
+// Initialize the payment gateways
+$bkash = new Bkash();
+$nagad = new Nagad();
+```
+
+### bKash Payment Example
+
+#### Create a bKash Payment
+
+```php
+// Create payment request
+$amount = 1000; // Amount in BDT
+$invoice = "INV-" . time(); // Unique invoice number
+$phone = "019XXXXXXXX"; // Customer phone number
+
+$payment = $bkash->createPayment($amount, $invoice, $phone);
+
+if ($payment['success'] === true) {
+    // Redirect to bKash payment page
+    header("Location: " . $payment['data']['bkashURL']);
+    exit;
+} else {
+    // Handle error
+    echo "Payment creation failed: " . $payment['message'];
+}
+```
+
+#### Execute bKash Payment (Callback)
+
+```php
+// This typically goes in your callback controller method
+if (isset($_GET['paymentID']) && isset($_GET['status']) && $_GET['status'] === 'success') {
+    $paymentID = $_GET['paymentID'];
+    $paymentResult = $bkash->executePayment($paymentID);
+
+    if ($paymentResult['success'] === true) {
+        // Payment successful
+        $trxID = $paymentResult['data']['trxID'];
+        echo "Payment completed successfully. Transaction ID: " . $trxID;
+    } else {
+        // Payment failed
+        echo "Payment execution failed: " . $paymentResult['message'];
+    }
+} else {
+    // Invalid callback
+    echo "Invalid payment callback";
+}
+```
+
+### Nagad Payment Example
+
+#### Create a Nagad Payment
+
+```php
+// Create payment request
+$amount = 1000; // Amount in BDT
+$invoice = "INV" . time(); // Unique invoice number
+
+$payment = $nagad->createPayment($amount, $invoice);
+
+if ($payment['success'] === true) {
+    // Redirect to Nagad payment page
+    header("Location: " . $payment['data']['callBackUrl']);
+    exit;
+} else {
+    // Handle error
+    echo "Payment creation failed: " . $payment['message'];
+}
+```
+
+#### Verify Nagad Payment (Callback)
+
+```php
+// This typically goes in your callback controller method
+if (isset($_GET['payment_ref_id']) && isset($_GET['status']) && $_GET['status'] === 'Success') {
+    $paymentRefId = $_GET['payment_ref_id'];
+    $paymentResult = $nagad->verifyPayment($paymentRefId);
+
+    if ($paymentResult['success'] === true) {
+        // Payment successful
+        $trxID = $paymentResult['data']['trxID'];
+        echo "Payment verified successfully. Transaction ID: " . $trxID;
+    } else {
+        // Payment verification failed
+        echo "Payment verification failed: " . $paymentResult['message'];
+    }
+} else {
+    // Invalid callback
+    echo "Invalid payment callback";
+}
+```
+
+## 🔧 API Reference
+
+### bKash Methods
+
+#### `createPayment($amount, $invoice, $payerReference)`
+
+Creates a new bKash payment request.
+
+**Parameters:**
+
+-   `$amount` (float) - Payment amount in BDT
+-   `$invoice` (string) - Unique invoice identifier
+-   `$payerReference` (string) - Customer phone number or reference
+
+**Returns:**
+
+-   Array with success status and payment data including `bkashURL` for redirection
+
+#### `executePayment($paymentID)`
+
+Executes a payment after user completion on bKash.
+
+**Parameters:**
+
+-   `$paymentID` (string) - Payment ID received from bKash callback
+
+**Returns:**
+
+-   Array with success status and transaction details including `trxID`
+
+### Nagad Methods
+
+#### `createPayment($amount, $invoice)`
+
+Creates a new Nagad payment request.
+
+**Parameters:**
+
+-   `$amount` (float) - Payment amount in BDT
+-   `$invoice` (string) - Unique invoice identifier
+
+**Returns:**
+
+-   Array with success status and payment data including `callBackUrl` for redirection
+
+#### `verifyPayment($paymentReferenceId)`
+
+Verifies a payment after user completion on Nagad.
+
+**Parameters:**
+
+-   `$paymentReferenceId` (string) - Payment reference ID received from Nagad callback
+
+**Returns:**
+
+-   Array with success status and transaction details including `trxID`
+
+### Response Format
+
+All methods return a consistent response format:
+
+```php
+[
+    'success' => true, // or false
+    'message' => 'Operation message',
+    'data' => [
+        // Payment-specific data
+        'trxID' => 'TRX123456',
+        'amount' => 1000,
+        // ... other fields
+    ]
+]
+```
+
+### Error Handling
+
+Always check the `success` field before proceeding:
+
+```php
+$payment = $bkash->createPayment(1000, 'INV001', '019XXXXXXXX');
+
+if ($payment['success'] === false) {
+    // Handle error
+    error_log("bKash Error: " . $payment['message']);
+    // Show user-friendly message
+    showError("Payment initialization failed. Please try again.");
+} else {
+    // Proceed with payment
+    redirect($payment['data']['bkashURL']);
+}
+```
 
 ## 🧩 Usage
 
