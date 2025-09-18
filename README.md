@@ -260,123 +260,6 @@ if (isset($_GET['payment_ref_id']) && isset($_GET['status']) && $_GET['status'] 
 }
 ```
 
-## 🔧 API Reference
-
-### bKash Methods
-
-#### `createPayment($amount, $invoice, $payerReference)`
-
-Creates a new bKash payment request.
-
-**Parameters:**
-
--   `$amount` (float) - Payment amount in BDT
--   `$invoice` (string) - Unique invoice identifier
--   `$payerReference` (string) - Customer phone number or reference
-
-**Returns:**
-
--   Array with success status and payment data including `bkashURL` for redirection
-
-#### `executePayment($paymentID)`
-
-Executes a payment after user completion on bKash.
-
-**Parameters:**
-
--   `$paymentID` (string) - Payment ID received from bKash callback
-
-**Returns:**
-
--   Array with success status and transaction details including `trxID`
-
-### Nagad Methods
-
-#### `createPayment($amount, $invoice)`
-
-Creates a new Nagad payment request.
-
-**Parameters:**
-
--   `$amount` (float) - Payment amount in BDT
--   `$invoice` (string) - Unique invoice identifier
-
-**Returns:**
-
--   Array with success status and payment data including `callBackUrl` for redirection
-
-#### `verifyPayment($paymentReferenceId)`
-
-Verifies a payment after user completion on Nagad.
-
-**Parameters:**
-
--   `$paymentReferenceId` (string) - Payment reference ID received from Nagad callback
-
-**Returns:**
-
--   Array with success status and transaction details including `trxID`
-
-### Response Format
-
-All methods return a consistent response format:
-
-```php
-[
-    'success' => true, // or false
-    'message' => 'Operation message',
-    'data' => [
-        // Payment-specific data
-        'trxID' => 'TRX123456',
-        'amount' => 1000,
-        // ... other fields
-    ]
-]
-```
-
-### Error Handling
-
-Always check the `success` field before proceeding:
-
-```php
-$payment = $bkash->createPayment(1000, 'INV001', '019XXXXXXXX');
-
-if ($payment['success'] === false) {
-    // Handle error
-    error_log("bKash Error: " . $payment['message']);
-    // Show user-friendly message
-    showError("Payment initialization failed. Please try again.");
-} else {
-    // Proceed with payment
-    redirect($payment['data']['bkashURL']);
-}
-```
-
-## 🧩 Usage
-
-### Basic Implementation
-
-Include the library in your project:
-
-```php
-require_once 'path/to/simple-bd-pgw-php/autoload.php';
-```
-
-### Initialize Payment Gateway
-
-```php
-use SimpleBDPGW\BkashPayment;
-use SimpleBDPGW\NagadPayment;
-
-// Initialize bKash
-$bkash = new BkashPayment();
-$paymentData = $bkash->createPayment(1000, 'ORD12345');
-
-// Initialize Nagad
-$nagad = new NagadPayment();
-$paymentData = $nagad->createPayment(1000, 'ORD12345');
-```
-
 ### Handling Callbacks
 
 The library automatically handles callbacks at the configured endpoints:
@@ -390,9 +273,9 @@ The library automatically handles callbacks at the configured endpoints:
 
 -   `createPayment($amount, $invoiceID, $payerReference)` - Create a new payment
 -   `executePayment($paymentID)` - Execute a payment
--   `queryPayment($paymentID)` - Query payment status
--   `searchTransaction($trxID)` - Search for a transaction
--   `refreshToken()` - Refresh authentication token
+-   `queryPayment($paymentID)` - Query payment status - Upcoming
+-   `searchTransaction($trxID)` - Search for a transaction - Upcoming
+-   `refreshToken()` - Refresh authentication token - Upcoming
 
 ### Nagad Methods
 
@@ -416,10 +299,6 @@ Obtain credentials from respective merchant panels:
 -   [bKash Merchant Panel](https://developer.bka.sh/)
 -   [Nagad Merchant Portal](https://channel.mynagad.com:20010/)
 
-### SSL Configuration
-
-For production use, SSL certification is required by both payment gateways.
-
 ## 🧪 Testing
 
 ### Sandbox Mode
@@ -433,13 +312,9 @@ NAGAD_SANDBOX=true
 
 Use test credentials provided by the payment gateways.
 
-### Test Cards
-
-Use test account credentials provided by bKash and Nagad for sandbox testing.
-
 ## 🤝 Contributing
 
-We welcome contributions to improve this library. Please follow these steps:
+I welcome contributions to improve this library. Please follow these steps:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
